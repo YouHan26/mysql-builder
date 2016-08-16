@@ -1,0 +1,23 @@
+{
+  "name": "mysql-builder",
+  "version": "1.0.0",
+  "description": "a simple builder tool for mysql",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YouHan26/mysql-builder.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YouHan26/mysql-builder/issues"
+  },
+  "homepage": "https://github.com/YouHan26/mysql-builder#readme",
+  "dependencies": {
+    "lodash": "^4.15.0",
+    "mysql": "^2.11.1"
+  }
+}
