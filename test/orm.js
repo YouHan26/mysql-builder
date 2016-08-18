@@ -1,7 +1,7 @@
 /**
  * Created by YouHan on 2016/8/18.
  */
-var Builder = require('./../src/index');
+var Builder = require('./../src/orm');
 var path = require('path');
 
 

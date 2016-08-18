@@ -19,6 +19,9 @@ var utils = {
             }
         }
         return true;
+    },
+    isObject : function(obj){
+        return typeof obj === 'object';
     }
 };
 

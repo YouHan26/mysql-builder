@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/YouHan26/mysql-builder#readme",
   "dependencies": {
+    "lodash": "^4.15.0",
     "mysql": "^2.11.1"
   }
 }
