@@ -122,7 +122,7 @@ var builder = function (setting) {
         } else if (typeof set === 'object') {
             for (var i in set) {
                 if (set.hasOwnProperty(i)) {
-                    whereClause[i] = _escape(set[i]);
+                    whereClause[i] = set[i];
                 }
             }
         }
@@ -148,10 +148,10 @@ var builder = function (setting) {
         return that;
     };
 
-    this.end = function (cb) {
+    this.end = function () {
         var sql = _generSql();
         _resetStatus();
-        return _runQuery(sql, cb);
+        return _runQuery(sql);
     };
 
     return that;
@@ -265,16 +265,21 @@ function _getLimitClause() {
 
 function _getWhereClause() {
     var result = '';
-    if (whereClause != {}) {
+    if (!utils.isEmptyObj(whereClause)) {
         result += ' Where ';
         for (var i in whereClause) {
             if (whereClause.hasOwnProperty(i)) {
                 var key = i,
                     value = whereClause[i];
                 if (value && utils.isArray(value)) {
-                    result += separator + _escapeId(key) + ' in ("' + value.join('", "') + '") ';
+                    result += separator + _escapeId(key) + ' in ( ';
+                    for (var i = 0, ii = value.length; i < ii; i++) {
+                        result += _escape(value[i]) + ',';
+                    }
+                    result = result.substr(0, result.lastIndexOf(','));
+                    result += separator + ' ) ';
                 } else if (value) {
-                    result += separator + _escapeId(key) + '=' + value + separator;
+                    result += separator + _escapeId(key) + '=' + _escape(value) + separator;
                 } else {
                     result += key;
                 }
@@ -288,9 +293,11 @@ function _getWhereClause() {
 
 function comma_separated_arguments(set) {
     var clause = '';
-    if (utils.isArray()) {
+    if (utils.isArray(set)) {
         for (var i = 0, ii = set.length; i < ii; i++) {
-            set[i] = _escapeId(set[i]);
+            // set[i] = _escapeId(set[i]);
+            //TODO escape column name for raw sql
+            set[i] = set[i];
         }
         clause = set.join(' , ');
     } else if (typeof set === 'string') {

@@ -8,6 +8,17 @@ var utils = {
     },
     isArray: function (obj) {
         return Object.prototype.toString.call(obj) === '[object Array]';
+    },
+    isEmptyObj: function (obj) {
+        if (typeof  obj !== 'object') {
+            return false;
+        }
+        for (var i in obj) {
+            if (obj.hasOwnProperty(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 };
 
