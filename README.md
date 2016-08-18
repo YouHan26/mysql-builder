@@ -5,7 +5,7 @@ a simple builder tool for mysql
 - [X] SELECT
 - [X] UPDATE
 - [X] INSERT (single-row)
-- [ ] INSERT (multi-row)
+- [X] INSERT (multi-row)
 - [ ] INSERT IGNORE
 - [X] DELETE
 - [ ] JOIN
