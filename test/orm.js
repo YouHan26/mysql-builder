@@ -11,16 +11,16 @@ var builder = new Builder(path.resolve(__dirname + '/db.js'));
  * insert table
  */
 builder.insert('test', [{
-    name: 'new name',
-    value: 123,
-    'create_time': new Date()
+  name: 'new name',
+  value: 123,
+  'create_time': new Date()
 }, {
-    name: 'new name 2',
-    value: 3213
+  name: 'new name 2',
+  value: 3213
 }]).end().then(function (res) {
-    console.log(res);
+  console.log(res);
 }).then(function (error) {
-    console.error(error);
+  console.error(error);
 });
 
 
@@ -29,24 +29,24 @@ builder.insert('test', [{
  */
 
 builder.update('test', {
-    name: 'single nam1e'
+  name: 'single nam1e'
 }).where({
-    id: 1
+  id: 1
 }).end().then(function (res) {
-    console.log(res);
+  console.log(res);
 }).then(function (error) {
-    console.error(error);
+  console.error(error);
 });
 
 
 builder.update('test', {
-    name: 'multi update'
+  name: 'multi update'
 }).where({
-    id: [5, 2, 3]
+  id: [5, 2, 3]
 }).end().then(function (res) {
-    console.log(res);
+  console.log(res);
 }).then(function (error) {
-    console.error(error);
+  console.error(error);
 });
 
 
@@ -54,32 +54,32 @@ builder.update('test', {
  * delete function
  */
 builder.delete('test')
-    .where({
-        id: [2, 3]
-    }).end();
+  .where({
+    id: [2, 3]
+  }).end();
 
 /**
  * select function
  */
 builder.select('test')
-    .where({
-        id: [4, 5, 6]
-    }).orderBy(['id desc', 'create_time'])
-    .end().then(function (res) {
-    console.log(res);
+  .where({
+    id: [4, 5, 6]
+  }).orderBy(['id desc', 'create_time'])
+  .end().then(function (res) {
+  console.log(res);
 });
 
 builder.select('test')
-    .where().orderBy(['id desc', 'create_time'])
-    .groupBy(['name', 'id'])
-    .end().then(function (res) {
-    console.log(res);
+  .where().orderBy(['id desc', 'create_time'])
+  .groupBy(['name', 'id'])
+  .end().then(function (res) {
+  console.log(res);
 });
 
 builder.select('test')
-    .where().orderBy(['id desc', 'create_time'])
-    .end().then(function (res) {
-    console.log(res);
+  .where().orderBy(['id desc', 'create_time'])
+  .end().then(function (res) {
+  console.log(res);
 });
 
 
