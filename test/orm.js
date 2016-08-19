@@ -5,7 +5,7 @@ var Builder = require('./../src/orm');
 var path = require('path');
 
 
-var builder = new Builder(path.resolve(__dirname + '/db.js'));
+var builder = new Builder(path.resolve(__dirname + '/pool.js'));
 
 /**
  * insert table
@@ -66,20 +66,17 @@ builder.select('test')
     id: [4, 5, 6]
   }).orderBy(['id desc', 'create_time'])
   .end().then(function (res) {
-  console.log(res);
 });
 
 builder.select('test')
   .where().orderBy(['id desc', 'create_time'])
   .groupBy(['name', 'id'])
   .end().then(function (res) {
-  console.log(res);
 });
 
 builder.select('test')
   .where().orderBy(['id desc', 'create_time'])
   .end().then(function (res) {
-  console.log(res);
 });
 
 

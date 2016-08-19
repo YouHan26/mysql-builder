@@ -12,8 +12,22 @@ var limitClause;
 var orderByClause;
 var groupByClause;
 var whereClause = {};    // key : value
-var insertClause;   // dateSet
-var updateClause;   // {key : value}
+/**
+ * {
+ *  keys : ['key', 'key'],
+ *  datas : [['value', 'value'], ['value', 'value']]
+ * }
+ * @type {{}}
+ */
+var insertClause = {};
+/**
+ * {
+ *  keys : ['key', 'key'],
+ *  datas : ['value', 'value']
+ * }
+ * @type {{}}
+ */
+var updateClause = {};
 var clause;
 var table;          //TODO trap 多线程？
 var valid = true;
@@ -38,32 +52,26 @@ var builder = function (setting) {
   /**
    * @example
    * .insert('table', {key : value, key :value})
+   * .insert('table', [{key : value, key :value},{key : value, key :value}])
    * @returns {builder}
    */
   this.insert = function (tableName, dataSet) {
     clause = 'insert';
     if (typeof  tableName === 'string' && typeof dataSet === 'object') {
       table = tableName;
-      if (utils.isArray(dataSet)) {
-        insertClause = dataSet;
-      } else {
-        insertClause = [dataSet];
-      }
-    } else {
-      valid = false;
-      validReason = 'insert table or data set invalid';
+      handleDataSet(insertClause, dataSet);
+      return that;
     }
-    return that;
+    throw new Error('no valid table name or data set');
   };
 
   /**
    * @example
    * .delete('table')
    * @param tableName
-   * @param cb
    * @returns {builder}
    */
-  this.delete = function (tableName, cb) {
+  this.delete = function (tableName) {
     clause = 'delete';
     if (typeof tableName === 'string') {
       table = tableName;
@@ -73,9 +81,10 @@ var builder = function (setting) {
 
   /**
    * @example
-   *  .select(table, 'id, name as tt')
-   *  .select(table, ['id', 'value'])
+   *  .select(table, 'id, name as tt') raw sql
+   *  .select(table, ['id', 'name'])
    * @param selectSet
+   * @param tableName
    * @returns {builder}
    */
   this.select = function (tableName, selectSet) {
@@ -93,14 +102,15 @@ var builder = function (setting) {
 
   /**
    * @example
-   * .update('table', {key : value})
+   * .update('table', {key : value, key : value})
    * @returns {builder}
    */
   this.update = function (tableName, dataSet) {
     clause = 'update';
     if (typeof tableName === 'string' && typeof dataSet === 'object') {
       table = tableName;
-      updateClause = dataSet;
+      updateClause.keys = handleSingleObj(dataSet).keys;
+      updateClause.datas = handleSingleObj(dataSet).datas;
     }
     return that;
   };
@@ -157,35 +167,23 @@ var builder = function (setting) {
   return that;
 };
 
+function generArray(array, prefix, separator, suffix) {
+  return prefix + array.join(separator) + suffix;
+}
+
+
 var generator = {
   _generinsert: function () {
-    // (name, age) VALUES('姚明',25),('麦蒂',25)
     var result = '';
-    if (insertClause && insertClause.length > 0) {
-      var obj = insertClause[0];
-      result += ' (';
-      for (var key in  obj) {
-        if (obj.hasOwnProperty(key)) {
-          result += _escapeId(key) + ',';
-        }
+    if (insertClause.keys) {
+      result += separator + generArray(insertClause.keys, ' ( ', ',', ' ) ') + separator;
+      result += ' VALUES ';
+      var list = insertClause.datas;
+      var tempstr = [];
+      for (var i = 0, ii = list.length; i < ii; i++) {
+        tempstr.push(generArray(list[i], ' ( ', ',', ' ) '));
       }
-      result = result.substr(0, result.length - 1);
-      result += ' ) values ';
-      for (var i = 0, ii = insertClause.length; i < ii; i++) {
-        var item = insertClause[i];
-        result += ' (';
-        for (var key in  obj) {
-          if (obj.hasOwnProperty(key)) {
-            result += _escape(item[key]) + ' , ';
-          }
-        }
-        result = result.substr(0, result.length - 2);
-        if (i < ii - 1) {
-          result += ' ), ';
-        } else {
-          result += ' ) ';
-        }
-      }
+      result += tempstr.join(',');
     }
     return result;
   },
@@ -193,7 +191,6 @@ var generator = {
     return '';
   },
   _generselect: function () {
-    //need gener 'from table'
     var result = '';
     if (selectClause) {
       if (selectClause.length == 0) {
@@ -201,26 +198,18 @@ var generator = {
       } else if (selectClause.length >= 0) {
         result += selectClause.join(',');
       }
-      result += ' FROM' + _escapeId(table);
+      result += ' FROM ' + _escapeId(table);
     }
     return result;
   },
   _generupdate: function () {
     var result = '';
-    if (typeof updateClause === 'object') {
-      for (var key in updateClause) {
-        if (updateClause.hasOwnProperty(key)) {
-          var value = updateClause[key];
-          if (utils.isArray(value)) {
-            for (var i = 0, ii = value.length; i < ii; i++) {
-              //TODO array
-            }
-          } else {
-            result += _escapeId(key) + '=' + _escape(updateClause[key]) + ',';
-          }
-        }
+    if (updateClause.keys && updateClause.datas) {
+      var tempstr = [];
+      for (var i = 0, ii = updateClause.keys.length; i < ii; i++) {
+        tempstr.push(separator + updateClause.keys[i] + ' = ' + updateClause.datas[i] + separator);
       }
-      result = result.substr(0, result.lastIndexOf(","))
+      result += separator + tempstr.join(',');
     }
     return result;
   }
@@ -320,8 +309,8 @@ function _resetStatus() {
   orderByClause = undefined;
   groupByClause = undefined;
   whereClause = {};
-  insertClause = undefined;
-  updateClause = undefined;
+  insertClause = {};
+  updateClause = {};
   clause = undefined;
   table = undefined;
   valid = true;
@@ -355,6 +344,45 @@ function _runQuery(sql) {
     }
   });
 }
+
+function handleDataSet(clause, dataSet) {
+  if (typeof dataSet === 'object') {
+    var keys = [];
+    var datas = [];
+    if (utils.isArray(dataSet) && dataSet.length >= 1) {
+      var obj = dataSet[0];
+      for (var i = 0, ii = dataSet.length; i < ii; i++) {
+        var temp = [];
+        Object.keys(obj).forEach(function (key) {
+          temp.push(_escape(dataSet[i][key]));
+        });
+        datas.push(temp);
+      }
+      clause.keys = handleSingleObj(dataSet[0]).keys;
+      clause.datas = datas;
+    } else {
+      clause.keys = handleSingleObj(dataSet).keys;
+      clause.datas = [handleSingleObj(dataSet).datas];
+    }
+  }
+}
+
+function handleSingleObj(dataSet) {
+  var keymap = [];
+  var datamap = [];
+  for (var key in dataSet) {
+    if (dataSet.hasOwnProperty(key)) {
+      keymap.push(_escapeId(key));
+      datamap.push(_escape(dataSet[key]));
+    }
+  }
+  return {
+    keys: keymap,
+    datas: datamap
+  };
+}
+
+
 
 function _resetPool(cb) {
   _pool.end(cb);
