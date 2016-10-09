@@ -322,24 +322,25 @@ function _runQuery(sql) {
     if (sql) {
       _pool.getConnection(function (err, conn) {
         if (err) {
-          console.error(err);
           rejector('err happen when get conn');
           throw err;
         }
-        console.log('------------', sql, '--------------');
-        conn.query(sql, function (err, rows) {
-          if (err) {
-            console.error(err);
-            rejector(error);
-            throw err;
-          }
-          resolver(rows);
+        try {
+          conn.query(sql, function (err, rows) {
+            if (err) {
+              rejector(error);
+              throw err;
+            }
+            resolver(rows);
+            conn.release();
+          });
+        } catch (e) {
+          rejector(e);
           conn.release();
-        });
+        }
       });
     } else {
       var msg = 'no valid sql';
-      console.error(msg);
       rejector(msg);
     }
   });

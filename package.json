@@ -1,6 +1,6 @@
 {
   "name": "mysql-orm-builder",
-  "version": "0.0.3",
+  "version": "0.0.6",
   "description": "a simple builder tool for mysql",
   "main": "index.js",
   "scripts": {
