@@ -164,6 +164,10 @@ var builder = function (setting) {
     return _runQuery(sql);
   };
 
+  this.run = function (sql) {
+    return _runQuery(sql);
+  };
+
   return that;
 };
 
